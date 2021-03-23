@@ -47,14 +47,50 @@ parseMessage m =
 parse :: String -> [LogMessage]
 parse f = map parseMessage $ lines f
 
+-- data LogMessage = LogMessage MessageType TimeStamp String
+--                 | Unknown String
+-- data MessageTree = Leaf
+--                  | Node MessageTree LogMessage MessageTree
+-- sorted by timestamp
+insert :: LogMessage -> MessageTree -> MessageTree
+insert lm mt = 
+    case lm of 
+        Unknown _ -> mt
+        LogMessage _ ts _ -> case mt of
+            Leaf -> Node Leaf lm Leaf
+            Node mtL (LogMessage _ mtTS _) mtR | ts <= mtTS -> insert lm mtL
+            Node mtL (LogMessage _ mtTS _) mtR | ts > mtTS -> insert lm mtR
+            _ -> mt
+plm :: LogMessage -> IO ()
+plm lm = 
+    case lm of 
+        Unknown _ -> print "Whoops"
+        LogMessage _ ts _ -> print ts
+pmt :: LogMessage -> MessageTree -> IO()
+pmt lm mt = 
+    case lm of 
+        Unknown _ -> print "Whoops"
+        LogMessage _ ts _ -> case mt of 
+            Leaf -> print "Leaf"
+            Node _ (LogMessage _ mtTS _) _ | ts < mtTS -> print ts
+            Node _ (LogMessage _ mtTS _) _ | ts >= mtTS -> print mtTS
+            _ -> print "whelp"
+
 
 main :: IO ()
 main = do
-   print $ takeFourWords "hello dude hey yo dude"
-   print $ parseMessage "I am an I"
-   print $ parseMessage "E 70 3 Way too many pickles"
-   print $ parseMessage "E 2 562 help help"
-   print $ parseMessage "I 29 la la la "
+--    print $ takeFourWords "hello dude hey yo dude"
+--    plm $ parseMessage "I am an I"
+--    plm $ parseMessage "E 70 3 Way too many pickles"
+--    plm $ parseMessage "E 2 562 help help"
+--    plm $ parseMessage "I 29 la la la "
+--    pmt (parseMessage "I 29 la la la") (Leaf)
+--    pmt (parseMessage "I 29 la la la") (Node Leaf (LogMessage Info 28 "bleah") Leaf)
+   let x = insert (LogMessage Info 28 "wassup") Leaf
+   print x
+   let y = insert (LogMessage Info 27 "hello") x
+   print y
+   print x
 
 
 -- E 70 3 Way too many pickles

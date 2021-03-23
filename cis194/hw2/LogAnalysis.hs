@@ -58,8 +58,8 @@ insert lm mt =
         Unknown _ -> mt
         LogMessage _ ts _ -> case mt of
             Leaf -> Node Leaf lm Leaf
-            Node mtL (LogMessage _ mtTS _) mtR | ts <= mtTS -> insert lm mtL
-            Node mtL (LogMessage _ mtTS _) mtR | ts > mtTS -> insert lm mtR
+            Node mtL (LogMessage a mtTS b) mtR | ts <= mtTS -> Node (insert lm mtL) (LogMessage a mtTS b) mtR
+            Node mtL (LogMessage a mtTS b) mtR | ts > mtTS -> Node mtL (LogMessage a mtTS b) (insert lm mtR)
             _ -> mt
 plm :: LogMessage -> IO ()
 plm lm = 
@@ -88,9 +88,11 @@ main = do
 --    pmt (parseMessage "I 29 la la la") (Node Leaf (LogMessage Info 28 "bleah") Leaf)
    let x = insert (LogMessage Info 28 "wassup") Leaf
    print x
-   let y = insert (LogMessage Info 27 "hello") x
+   let y = insert (LogMessage Info 27 "hello") (Node Leaf (LogMessage Info 25 "yo") (Node Leaf (LogMessage Info 26 "dude") Leaf)) 
    print y
    print x
+   let z = insert (LogMessage Info 27 "dood") x
+   print z
 
 
 -- E 70 3 Way too many pickles

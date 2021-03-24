@@ -86,8 +86,20 @@ inOrder :: MessageTree -> [LogMessage]
 inOrder Leaf = []
 inOrder (Node mtL lm mtR) = (inOrder mtL) ++ [lm] ++ (inOrder mtR)
 
--- whatWentWrong :: [LogMessage] -> [String]
--- whatWentWrong lms = 
+filterError :: [LogMessage] -> [LogMessage]
+filterError [] = []
+filterError ((LogMessage mt ts m) : xs) = 
+    case mt of 
+        Error e | e >= 50 -> (LogMessage mt ts m) : (filterError xs)
+        _ -> filterError xs
+filterError _ = []
+
+collapseToMsg :: [LogMessage] -> [String]
+collapseToMsg [] = []
+collapseToMsg ((LogMessage _ _ m) : xs) = [m] ++ (collapseToMsg xs)
+
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong lms = (collapseToMsg . inOrder . build . filterError) lms
 
 main :: IO ()
 main = do

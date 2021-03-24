@@ -61,6 +61,8 @@ insert lm mt =
             Node mtL (LogMessage a mtTS b) mtR | ts <= mtTS -> Node (insert lm mtL) (LogMessage a mtTS b) mtR
             Node mtL (LogMessage a mtTS b) mtR | ts > mtTS -> Node mtL (LogMessage a mtTS b) (insert lm mtR)
             _ -> mt
+
+-- debugging functions -- print log message (plm) and print message tree (pmt)
 plm :: LogMessage -> IO ()
 plm lm = 
     case lm of 
@@ -76,6 +78,16 @@ pmt lm mt =
             Node _ (LogMessage _ mtTS _) _ | ts >= mtTS -> print mtTS
             _ -> print "whelp"
 
+build :: [LogMessage] -> MessageTree
+build [] = Leaf
+build (x:xs) = insert x $ build xs
+
+inOrder :: MessageTree -> [LogMessage]
+inOrder Leaf = []
+inOrder (Node mtL lm mtR) = (inOrder mtL) ++ [lm] ++ (inOrder mtR)
+
+-- whatWentWrong :: [LogMessage] -> [String]
+-- whatWentWrong lms = 
 
 main :: IO ()
 main = do
@@ -93,6 +105,8 @@ main = do
    print x
    let z = insert (LogMessage Info 27 "dood") x
    print z
+   let q = insert (Unknown "yoyoyo") z
+   print q
 
 
 -- E 70 3 Way too many pickles

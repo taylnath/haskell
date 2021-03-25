@@ -32,15 +32,15 @@ addxToNth _ _ [] = []
 addxToNth x 0 (y:ys) = [x + y] ++ ys
 addxToNth x n (y:ys) = y : (addxToNth x (n-1) ys)
 
--- add x to all elements in list
-addxToAll :: Integer -> [Integer] -> [Integer]
-addxToAll _ [] = []
-addxToAll x (y:ys) = [x + y] ++ (addxToAll x ys)
+-- -- add x to all elements in list
+-- addxToAll :: Integer -> [Integer] -> [Integer]
+-- addxToAll _ [] = []
+-- addxToAll x (y:ys) = [x + y] ++ (addxToAll x ys)
 
 tally :: [Integer] -> [Integer]
 tally [] = [0,0,0,0,0,0,0,0,0,0]
 tally (x:xs)
-    | 0 <= x && x<= 9   = addxToNth x x (tally xs)
+    | 0 <= x && x<= 9   = addxToNth 1 x (tally xs)
     | otherwise         = tally []
 
 -- histBuilder takes a tally of integers
@@ -58,18 +58,8 @@ histLines :: [Integer] -> String
 histLines [0,0,0,0,0,0,0,0,0,0] = ""
 histLines xs =  (histLines (snd $ histBuilder xs)) ++ (fst $ histBuilder xs)
 
-
--- histList :: [Integer] -> [String] -> [String]
--- histList [] [] = ["          "]
--- histList [x] [] = 
---     case 
--- histList (x:xs)
---     | 
-
 histogram :: [Integer] -> String
 histogram xs = (histLines $ tally $ xs) ++ "==========\n0123456789"
--- histogram (x:xs) = 
-histogram _ = histogram []
 
 simpleHistogram :: [Integer] -> String
 simpleHistogram [] = "=\n0"
@@ -86,7 +76,8 @@ main = do
     -- print $ localMaxima [2,9,5,6,1]
     -- print $ localMaxima [2,3,4,1,5]
     -- print $ localMaxima [1,2,3,4,5]
-    print $ tally [1,1,1,5]
+    -- print $ tally [1,1,1,5]
     putStrLn $ histogram [1,1,1,5]
+    -- putStrLn $ histogram [1,4,5,4,6,6,3,4,2,4,9]
     -- putStrLn $ simpleHistogram [1,1,1,5]
     -- putStrLn $ histLines [0,0,0,0,2,0,0,0,0,1]

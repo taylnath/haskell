@@ -29,11 +29,12 @@ data Tree a = Leaf
 -- differ by at most 1) binary tree from the list of values, using foldr.
 insert :: a -> Tree a -> Tree a
 insert x Leaf = Node 0 Leaf x Leaf
-insert x (Node h Leaf y Leaf) = Node (h+1) (Node 0 Leaf x Leaf) y Leaf
-insert x (Node h Leaf y r) = Node h (Node 0 Leaf x Leaf) y r
-insert x (Node h l y Leaf) = Node h l y (Node 0 Leaf x Leaf)
+-- increase height recursively in this next case
+insert x (Node h Leaf y Leaf) = Node (h+1) (Node 0 Leaf x Leaf) y Leaf -- height incr
+-- insert x (Node h Leaf y r) = Node h (Node 0 Leaf x Leaf) y r
+insert x (Node h l y Leaf) = Node h l y (Node 0 Leaf x Leaf) -- no height incr
 insert x (Node h (Node hL lL yL rL) y (Node hR lR yR rR))
-    | hL < hR   = Node h (insert x (Node hL lL yL rL)) y (Node hR lR yR rR)
+    | hL <= hR   = Node h (insert x (Node hL lL yL rL)) y (Node hR lR yR rR)
     | otherwise = Node h (Node hL lL yL rL) y (insert x (Node hR lR yR rR))
 
 

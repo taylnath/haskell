@@ -61,9 +61,28 @@ appendxToNth _ x [] = [x]
 appendxToNth 0 x (y:ys) = (y ++ x) : ys
 appendxToNth n x (y:ys) = [y] ++ appendxToNth (n-1) x ys
 
--- stringListTree :: Integer -> Tree Char -> [String]
--- stringListTree numLevels Leaf = replicate numLevels []
--- stringListTree numLevels (Node h l y r) = appendxToNth h y 
+stringListTree :: Integer -> [String] -> Tree Char -> [String]
+stringListTree level list Leaf = appendxToNth level "." list
+stringListTree level list (Node h l y r) 
+    = appendxToNth level [y] (stringListTree (level + 1) (stringListTree (level + 1) list l) r)
+
+makeStringListTree :: Int -> Tree Char -> [String]
+makeStringListTree numLevels x = stringListTree 0 (replicate numLevels []) x
+
+lStrip :: String -> String
+lStrip "" = ""
+lStrip (x:xs)
+    | x == ' '  = lStrip xs
+    | otherwise = x:xs
+
+treeLines :: Int -> [String] -> String
+treeLines _ [] = "\n"
+-- treeLines 0 (x:xs) = (lStrip x) ++ "\n"
+treeLines n (x:xs) = (replicate n '-') ++ (unwords (map (\y -> (replicate n 'x') ++ [y]) x)) ++ "\n" ++ (treeLines (n-1) xs)
+
+printTree :: Int -> Tree Char -> IO ()
+printTree numLevels x = putStr $ treeLines numLevels (makeStringListTree numLevels x)
+-- printTree numLevels x = putStr $ unlines $ makeStringListTree numLevels x
 -- printTree (Node h l y r) = (replicate h ' ') ++ show(y) ++ "\n"
 
 -- xor returns True iff number of True values is odd.

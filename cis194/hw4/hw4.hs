@@ -42,7 +42,7 @@ insert x (Node h (Node hL lL yL rL) y (Node hR lR yR rR))
 
 
 foldTree :: [a] -> Tree a
-foldTree xs = foldr (\x y -> Leaf) Leaf xs
+foldTree xs = foldr (\x y -> insert x y) Leaf xs
 
 -- xor returns True iff number of True values is odd.
 xor :: [Bool] -> Bool

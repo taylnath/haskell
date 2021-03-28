@@ -1,3 +1,5 @@
+import Data.List (intercalate)
+
 -- Ex 1: re-implement fun1 and fun2 more idiomatically, 
 -- potentially using iterate and takeWhile
 fun1 :: [Integer] -> Integer
@@ -61,6 +63,7 @@ appendxToNth _ x [] = [x]
 appendxToNth 0 x (y:ys) = (y ++ x) : ys
 appendxToNth n x (y:ys) = [y] ++ appendxToNth (n-1) x ys
 
+-- TODO: problem -- this doesn't account for many blank nodes, i.e. there should be 2^n items in each row
 stringListTree :: Integer -> [String] -> Tree Char -> [String]
 stringListTree level list Leaf = appendxToNth level "." list
 stringListTree level list (Node h l y r) 
@@ -75,13 +78,34 @@ lStrip (x:xs)
     | x == ' '  = lStrip xs
     | otherwise = x:xs
 
+-- revTreeLines is used instead
 treeLines :: Int -> [String] -> String
 treeLines _ [] = "\n"
 -- treeLines 0 (x:xs) = (lStrip x) ++ "\n"
-treeLines n (x:xs) = (replicate n '-') ++ (unwords (map (\y -> (replicate n 'x') ++ [y]) x)) ++ "\n" ++ (treeLines (n-1) xs)
+-- intercalate used instead of unwords for more control over spaces
+treeLines n (x:xs) = (replicate (2*n) '-') ++ (intercalate "" (map (\y -> (replicate (2*n+1) 'x') ++ [y]) x)) ++ "\n" ++ (treeLines (n-1) xs)
 
-printTree :: Int -> Tree Char -> IO ()
-printTree numLevels x = putStr $ treeLines numLevels (makeStringListTree numLevels x)
+-- takes the stringList reversed, returns reversed stringList
+revTreeLines :: Int -> Int -> Int -> [String] -> [String]
+revTreeLines _ _ _ [] = []
+-- ignore first string
+-- revTreeLines 0 a b (x:xs) = revTreeLines 1 a b xs
+revTreeLines level preSpaces interSpaces (x:xs) = 
+    case x of 
+        (z:zs) -> [(replicate preSpaces ' ') ++ [z] ++ (intercalate "" (map (\y -> (replicate interSpaces ' ') ++ [y]) zs))] ++ (revTreeLines (level+1) interSpaces (2 * interSpaces + 1) xs)
+        otherwise -> ["yo"]
+
+revPrintTree :: Int -> Tree Char -> IO ()
+revPrintTree numLevels x = putStr $ unlines $ reverse $ revTreeLines 0 0 1 $ reverse $ makeStringListTree numLevels x
+-- revPrintTree numLevels x = putStr $ lines $ makeStringListTree numLevels x
+
+printTree :: Tree Char -> IO ()
+printTree Leaf = putStr ""
+printTree (Node h l y r) = revPrintTree (fromIntegral (h+1)) (Node h l y r)
+
+-- old version of printTree
+-- printTree :: Int -> Tree Char -> IO ()
+-- printTree numLevels x = putStr $ treeLines numLevels (makeStringListTree numLevels x)
 -- printTree numLevels x = putStr $ unlines $ makeStringListTree numLevels x
 -- printTree (Node h l y r) = (replicate h ' ') ++ show(y) ++ "\n"
 

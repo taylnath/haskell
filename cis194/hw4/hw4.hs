@@ -40,9 +40,31 @@ insert x (Node h (Node hL lL yL rL) y (Node hR lR yR rR))
     | hL <= hR   = Node h (insert x (Node hL lL yL rL)) y (Node hR lR yR rR)
     | otherwise = Node h (Node hL lL yL rL) y (insert x (Node hR lR yR rR))
 
+height :: Tree a -> Integer
+height Leaf = 0
+height (Node h _ _ _) = h
+
+updateHeight :: Tree a -> Tree a
+updateHeight Leaf = Leaf
+updateHeight (Node h Leaf y Leaf) = Node 0 Leaf y Leaf
+updateHeight (Node h l y r) = Node ((max (height (updateHeight l)) (height (updateHeight r))) + 1) (updateHeight l) y (updateHeight r)
 
 foldTree :: [a] -> Tree a
-foldTree xs = foldr (\x y -> insert x y) Leaf xs
+foldTree xs = foldr (\x y -> (updateHeight . (insert x)) y) Leaf xs
+
+nodeVal :: Tree Char -> String
+nodeVal Leaf = " "
+nodeVal (Node _ _ y _) = [y]
+
+appendxToNth :: Integer -> String -> [String] -> [String]
+appendxToNth _ x [] = [x]
+appendxToNth 0 x (y:ys) = (y ++ x) : ys
+appendxToNth n x (y:ys) = [y] ++ appendxToNth (n-1) x ys
+
+-- stringListTree :: Integer -> Tree Char -> [String]
+-- stringListTree numLevels Leaf = replicate numLevels []
+-- stringListTree numLevels (Node h l y r) = appendxToNth h y 
+-- printTree (Node h l y r) = (replicate h ' ') ++ show(y) ++ "\n"
 
 -- xor returns True iff number of True values is odd.
 xor :: [Bool] -> Bool

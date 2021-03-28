@@ -9,6 +9,7 @@ fun1 (x:xs)
 fun1' :: [Integer] -> Integer
 fun1' xs = foldr (\x y -> (x - 2) * y) 1 (filter even xs)
 
+-- TODO: finish fun2
 fun2 :: Integer -> Integer
 fun2 1 = 0
 fun2 n 
@@ -24,6 +25,8 @@ fun2' n =
 data Tree a = Leaf 
     | Node Integer (Tree a) a (Tree a)
     deriving (Show, Eq)
+
+-- TODO: finish insert/foldTree
 
 -- generates a balanced (height of left/right subtrees recursively 
 -- differ by at most 1) binary tree from the list of values, using foldr.
@@ -41,6 +44,14 @@ insert x (Node h (Node hL lL yL rL) y (Node hR lR yR rR))
 foldTree :: [a] -> Tree a
 foldTree xs = foldr (\x y -> Leaf) Leaf xs
 
+-- xor returns True iff number of True values is odd.
+xor :: [Bool] -> Bool
+xor xs = foldr (\x y -> (x || y) && not (x && y)) False xs
+
+-- map implemented as a fold
+map' :: (a -> b) -> [a] -> [b]
+map' f = foldr (\x ys -> (f x) : ys) []
+
 main = do
     print $ and $ map (\x -> fun1 x == fun1' x) 
         [
@@ -51,4 +62,20 @@ main = do
             [1,1,4,5,6,7,8],
             [-10,38,5,9,11]
         ]
-    mapM (\x -> print (fun2 x == fun2' x)) [-10,1,2,3,0,4,5,6]
+    -- mapM (\x -> print (fun2 x == fun2' x)) [-10,1,2,3,0,4,5,6]
+    putStr "\nTesting xor:\n"
+    mapM (\x -> print (xor x)) 
+        [
+            [False, True, False],
+            [False, True, False, False, True],
+            [],
+            [True],
+            [False]
+        ]
+
+    putStr "\nTesting map'\n"
+    mapM (\x -> print (map' (\y -> y*2) x))
+        [
+            [1,2,3],
+            [4,5,6]
+        ]

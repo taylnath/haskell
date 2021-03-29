@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeSynonymInstances #-}
 module Calc where
 
 import ExprT
@@ -84,3 +85,29 @@ testInteger = testExp :: Maybe Integer
 testBool = testExp :: Maybe Bool
 testMM = testExp :: Maybe MinMax
 testMod7 = testExp :: Maybe Mod7
+
+----------------------------------------------------------
+-- Ex 6
+----------------------------------------------------------
+
+class HasVars a where
+    var :: String -> a
+
+data VarExprT = Lit Integer
+           | Add VarExprT VarExprT
+           | Mul VarExprT VarExprT
+           | Var Integer
+  deriving (Show, Eq)
+
+instance HasVars VarExprT where
+    var s = Var 1
+
+instance Expr VarExpr where
+    lit n = Calc.Lit n :: VarExprT
+    add e g = Calc.Add e g :: VarExprT
+    mul e g = Calc.Mul e g :: VarExprT
+
+-- class (Show e) => Expr e where
+--     lit :: Integer -> e
+--     add :: e -> e -> e
+--     mul :: e -> e -> e

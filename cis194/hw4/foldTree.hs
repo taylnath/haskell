@@ -7,48 +7,64 @@ data Tree a = Leaf
     | Node Integer (Tree a) a (Tree a)
     deriving (Show, Eq)
 
--- generates a balanced (height of left/right subtrees recursively 
--- differ by at most 1) binary tree from the list of values, using foldr.
+-- | Insert x into a tree, keeping the tree balanced. 
+-- | Favors the left subtree.
 insert :: a -> Tree a -> Tree a
 insert x Leaf = Node 0 Leaf x Leaf
--- increase height recursively in this next case
 insert x (Node h Leaf y Leaf) = Node (h+1) (Node 0 Leaf x Leaf) y Leaf -- height incr
--- insert x (Node h Leaf y r) = Node h (Node 0 Leaf x Leaf) y r
+insert x (Node h Leaf y r) = Node h (Node 0 Leaf x Leaf) y r -- this case doesn't happen? Since we fill in the left first
 insert x (Node h l y Leaf) = Node h l y (Node 0 Leaf x Leaf) -- no height incr
 insert x (Node h (Node hL lL yL rL) y (Node hR lR yR rR))
     | hL <= hR   = Node h (insert x (Node hL lL yL rL)) y (Node hR lR yR rR)
     | otherwise = Node h (Node hL lL yL rL) y (insert x (Node hR lR yR rR))
 
+-- | Get the height of a tree.
 height :: Tree a -> Integer
 height Leaf = 0
 height (Node h _ _ _) = h
 
+-- | Update the height of a tree to be correct (could this go in the insert function?)
 updateHeight :: Tree a -> Tree a
 updateHeight Leaf = Leaf
 updateHeight (Node h Leaf y Leaf) = Node 0 Leaf y Leaf
 updateHeight (Node h l y r) = Node ((max (height (updateHeight l)) (height (updateHeight r))) + 1) (updateHeight l) y (updateHeight r)
 
+-- | Make a balanced tree from the list. 
+-- | generates a balanced (height of left/right subtrees recursively 
+-- | differ by at most 1) binary tree from the list of values, using foldr.
 foldTree :: [a] -> Tree a
 foldTree xs = foldr (\x y -> (updateHeight . (insert x)) y) Leaf xs
 
--- nodeVal :: Tree Char -> String
--- nodeVal Leaf = " "
--- nodeVal (Node _ _ y _) = [y]
+-- | Get the value of the node, or empty string for Leafs. 
+nodeVal :: Tree Char -> String
+nodeVal Leaf = ""
+nodeVal (Node _ _ y _) = [y]
 
-appendxToNth :: Int -> String -> [String] -> [String]
-appendxToNth _ x [] = [x]
-appendxToNth 0 x (y:ys) = (y ++ x) : ys
-appendxToNth n x (y:ys) = [y] ++ appendxToNth (n-1) x ys
+-- | append the second argument to the string at index given in the first argument
+xToNth :: Int -> String -> [String] -> [String]
+xToNth _ x [] = [x]
+xToNth 0 x (y:ys) = (y ++ x) : ys
+xToNth n x (y:ys) = [y] ++ xToNth (n-1) x ys
 
-stringListTree :: Int -> [String] -> Tree Char -> [String]
--- stringListTree level list Leaf = appendxToNth level "." list
-stringListTree (-1) list _ = list
-stringListTree level list Leaf = appendxToNth level "." (stringListTree (level - 1) (stringListTree (level - 1) list Leaf) Leaf)
-stringListTree level list (Node h l y r) 
-    = appendxToNth level [y] (stringListTree (level - 1) (stringListTree (level - 1) list l) r)
+-- | Applies the function (i.e. stringListTree) to the left tree, then to the right tree
+applyToLR :: (Int -> [String] -> Tree Char -> [String])  -> Int -> [String] -> Tree Char -> [String]
+applyToLR f level list Leaf = f level (f level list Leaf) Leaf
+applyToLR f level list (Node h l y r) = f level (f level list l) r
+
+-- | Given a number n of levels, a list of strings (with n empty strings), and a tree,
+-- | strList returns a list of strings where each string contains the characters in that 
+-- | row of the tree. The "." string is placed when there is a Leaf. 
+strList :: Int -> [String] -> Tree Char -> [String]
+strList (-1) list _ = list
+strList level list Leaf = xToNth level "." $ applyToLR strList (level - 1) list Leaf
+strList level list x = xToNth level (nodeVal x) $ applyToLR strList (level-1) list x
+-- old code:
+-- stringListTree level list Leaf = appendxToNth level "." (stringListTree (level - 1) (stringListTree (level - 1) list Leaf) Leaf)
+-- stringListTree level list (Node h l y r) 
+--     = appendxToNth level [y] (stringListTree (level - 1) (stringListTree (level - 1) list l) r)
 
 makeStringListTree :: Int -> Tree Char -> [String]
-makeStringListTree numLevels x = stringListTree numLevels (replicate numLevels []) x
+makeStringListTree numLevels x = strList numLevels (replicate numLevels []) x
 
 -- | Returns n spaces.
 spaces :: Int -> String

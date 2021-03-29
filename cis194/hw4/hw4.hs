@@ -58,19 +58,21 @@ nodeVal :: Tree Char -> String
 nodeVal Leaf = " "
 nodeVal (Node _ _ y _) = [y]
 
-appendxToNth :: Integer -> String -> [String] -> [String]
+appendxToNth :: Int -> String -> [String] -> [String]
 appendxToNth _ x [] = [x]
 appendxToNth 0 x (y:ys) = (y ++ x) : ys
 appendxToNth n x (y:ys) = [y] ++ appendxToNth (n-1) x ys
 
 -- TODO: problem -- this doesn't account for many blank nodes, i.e. there should be 2^n items in each row
-stringListTree :: Integer -> [String] -> Tree Char -> [String]
-stringListTree level list Leaf = appendxToNth level "." list
+stringListTree :: Int -> [String] -> Tree Char -> [String]
+-- stringListTree level list Leaf = appendxToNth level "." list
+stringListTree (-1) list _ = list
+stringListTree level list Leaf = appendxToNth level "." (stringListTree (level - 1) (stringListTree (level - 1) list Leaf) Leaf)
 stringListTree level list (Node h l y r) 
-    = appendxToNth level [y] (stringListTree (level + 1) (stringListTree (level + 1) list l) r)
+    = appendxToNth level [y] (stringListTree (level - 1) (stringListTree (level - 1) list l) r)
 
 makeStringListTree :: Int -> Tree Char -> [String]
-makeStringListTree numLevels x = stringListTree 0 (replicate numLevels []) x
+makeStringListTree numLevels x = stringListTree numLevels (replicate numLevels []) x
 
 lStrip :: String -> String
 lStrip "" = ""
@@ -89,14 +91,14 @@ treeLines n (x:xs) = (replicate (2*n) '-') ++ (intercalate "" (map (\y -> (repli
 revTreeLines :: Int -> Int -> Int -> [String] -> [String]
 revTreeLines _ _ _ [] = []
 -- ignore first string
--- revTreeLines 0 a b (x:xs) = revTreeLines 1 a b xs
+revTreeLines 0 a b (x:xs) = revTreeLines 1 a b xs
 revTreeLines level preSpaces interSpaces (x:xs) = 
     case x of 
         (z:zs) -> [(replicate preSpaces ' ') ++ [z] ++ (intercalate "" (map (\y -> (replicate interSpaces ' ') ++ [y]) zs))] ++ (revTreeLines (level+1) interSpaces (2 * interSpaces + 1) xs)
         otherwise -> ["yo"]
 
 revPrintTree :: Int -> Tree Char -> IO ()
-revPrintTree numLevels x = putStr $ unlines $ reverse $ revTreeLines 0 0 1 $ reverse $ makeStringListTree numLevels x
+revPrintTree numLevels x = putStr $ unlines $ reverse $ revTreeLines 0 0 1 $  makeStringListTree numLevels x
 -- revPrintTree numLevels x = putStr $ lines $ makeStringListTree numLevels x
 
 printTree :: Tree Char -> IO ()

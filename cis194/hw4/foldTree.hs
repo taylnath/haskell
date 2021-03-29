@@ -2,6 +2,7 @@
 
 import Data.List (intercalate)
 
+-- a Tree is either a leaf, or a Node with left/right subtrees
 data Tree a = Leaf 
     | Node Integer (Tree a) a (Tree a)
     deriving (Show, Eq)
@@ -49,26 +50,39 @@ stringListTree level list (Node h l y r)
 makeStringListTree :: Int -> Tree Char -> [String]
 makeStringListTree numLevels x = stringListTree numLevels (replicate numLevels []) x
 
--- takes the stringList reversed (from normal order), returns reversed stringList
+-- | Returns n spaces.
+spaces :: Int -> String
+spaces n = replicate n ' '
+
+-- | Puts n spaces in-between each character of a string
+interSpace :: Int -> String -> String
+interSpace n s = intercalate "" $ map (\x -> spaces n ++ [x]) s
+
+-- | Uses spaces and interSpace to space a string
+spacer :: Int -> Int -> String -> String
+spacer _ _ "" = ""
+spacer preSpaces interSpaces (x:xs) = spaces preSpaces ++ [x] ++ interSpace interSpaces xs
+
+-- | Places spaces in the appropriate places of a stringListTree
+-- | - The bottom row characters have one space in-between, and no margin space. 
+-- | - The next row has the margin space equal to the previous in-between space,
+-- |   and the in-between space equal to 2n+1, where n is the previous in-between space.
+-- | - Takes the stringList reversed (how makeStringListTree produces it)
+-- | - Returns reversed stringList
 revTreeLines :: Int -> Int -> Int -> [String] -> [String]
 revTreeLines _ _ _ [] = []
--- ignore first string
-revTreeLines 0 a b (x:xs) = revTreeLines 1 a b xs
-revTreeLines level preSpaces interSpaces (x:xs) = 
-    case x of 
-        (z:zs) -> [(replicate preSpaces ' ') ++ [z] ++ (intercalate "" (map (\y -> (replicate interSpaces ' ') ++ [y]) zs))] ++ (revTreeLines (level+1) interSpaces (2 * interSpaces + 1) xs)
-        otherwise -> ["yo"]
+revTreeLines 0 a b (x:xs) = revTreeLines 1 a b xs   -- ignore first string
+revTreeLines level preSpaces interSpaces (x:xs)     -- space this string, then move to the next
+    = [spacer preSpaces interSpaces x] ++ revTreeLines (level+1) interSpaces (2*interSpaces+1) xs
 
+-- | Final processing to print a tree.
+-- | - use makeStringListTree to get a list of nodes at each level
+-- | - use revTreeLines to place spaces in the appropriate places
+-- | - then reverse the result, convert to lines, and print
 revPrintTree :: Int -> Tree Char -> IO ()
-revPrintTree numLevels x = putStr $ unlines $ reverse $ revTreeLines 0 0 1 $  makeStringListTree numLevels x
--- revPrintTree numLevels x = putStr $ lines $ makeStringListTree numLevels x
+revPrintTree numLevels x = putStr.unlines.reverse.revTreeLines 0 0 1 $ makeStringListTree numLevels x
 
 printTree :: Tree Char -> IO ()
 printTree Leaf = putStr ""
+-- number of rows is 1 + height to account for the bottom row (level 0)
 printTree (Node h l y r) = revPrintTree (fromIntegral (h+1)) (Node h l y r)
-
--- old version of printTree
--- printTree :: Int -> Tree Char -> IO ()
--- printTree numLevels x = putStr $ treeLines numLevels (makeStringListTree numLevels x)
--- printTree numLevels x = putStr $ unlines $ makeStringListTree numLevels x
--- printTree (Node h l y r) = (replicate h ' ') ++ show(y) ++ "\n"

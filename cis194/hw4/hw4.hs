@@ -57,6 +57,23 @@ xor xs = foldr (\x y -> (x || y) && not (x && y)) False xs
 map' :: (a -> b) -> [a] -> [b]
 map' f = foldr (\x ys -> (f x) : ys) []
 
+---------------------------------------------------------
+-- Ex 4
+---------------------------------------------------------
+
+sund :: Integer -> Integer -> Integer
+sund x y = x + y + 2 * x * y
+
+sundaramNums :: Integer -> [Integer]
+sundaramNums n = [(sund x y) | x <- [1..n], y <- [x..n], (sund x y) <= n]
+
+sundaramList :: Integer -> [Integer]
+sundaramList n = filter (\x -> not (elem x (sundaramNums n))) [1..n]
+
+-- | Gives the odd prime numbers up to 2n + 2
+sieveSundaram :: Integer -> [Integer]
+sieveSundaram n = map (\x -> 2 * x + 1) $ sundaramList n
+
 main = do
     print $ and $ map (\x -> fun1 x == fun1' x) 
         [

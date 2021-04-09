@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
+import Data.Bits
 
 ------------------------------------------------------------
 -- Ex 1
@@ -41,7 +44,7 @@ infiniteListToStream (x:xs) = Cons x (infiniteListToStream xs)
 
 -- print Streams by showing first 10 elements
 instance Show a => Show (Stream a) where
-  show x = show $ take 10 $ streamToList x
+  show x = show $ take 20 $ streamToList x
 
 ------------------------------------------------------------
 -- Ex 4
@@ -65,3 +68,53 @@ streamFromSeed f x = Cons x (streamFromSeed f (f x))
 -- Ex 5
 ------------------------------------------------------------
 
+-- stream of natural numbers
+nats :: Stream Integer
+nats = streamFromSeed (\x -> x + 1) 0
+
+-- stream of positive natural numbers
+posnats :: Stream Integer
+posnats = streamFromSeed (\x -> x + 1) 1
+
+
+-- function that returns the largest power of 2 that evenly divides n
+-- (meant for positive integers only)
+fruler :: Integer -> Integer
+fruler x
+  | odd x = 0
+  | otherwise = 1 + fruler (div x 2)
+
+-- stream of the --ruler function-- 
+-- 0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,...
+-- where the n-th element in the stream (assuming first elt is n=1)
+-- is the largest power of 2 which evenly divides n
+ruler :: Stream Integer
+ruler = streamMap fruler posnats
+
+------------------------------------------------------------
+-- Ex 6
+------------------------------------------------------------
+
+x :: Stream Integer
+x = Cons 0 (Cons 1 (streamRepeat 0))
+
+instance Num (Stream Integer) where
+  fromInteger n = Cons n (streamRepeat 0)
+  negate s = streamMap (\n -> (-n)) s
+  (+) (Cons n ns) (Cons m ms) = Cons (n + m) ((+) ns ms)
+  (*) (Cons n ns) (Cons m ms) = Cons (n * m) ((streamMap (\k -> k * n) ms) + (ns * (Cons m ms)))
+
+instance Fractional (Stream Integer) where
+  (/) (Cons n ns) (Cons m ms) = Cons (div n m) (streamMap (\k -> div k m) (ns - ((/) (Cons n ns) (Cons m ms)) * ms))
+  -- (/) (Cons n ns) (Cons m ms) = Cons (div n m) 
+
+-- define Fibonacci sequence as the coefficients of the infinite series 
+-- x / (1 - x - x^2)
+fibs3 :: Stream Integer
+fibs3 = x / (1 - x - x^2)
+
+
+-- instance Expr MinMax where
+--     lit n = MinMax n
+--     add (MinMax n) (MinMax m) = MinMax (max n m)
+--     mul (MinMax n) (MinMax m) = MinMax (min n m)

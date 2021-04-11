@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -fno-warn-missing-methods #-}
-import Data.Bits
 
 ------------------------------------------------------------
 -- Ex 1

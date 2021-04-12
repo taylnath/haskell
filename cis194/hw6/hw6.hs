@@ -112,8 +112,27 @@ instance Fractional (Stream Integer) where
 fibs3 :: Stream Integer
 fibs3 = x / (1 - x - x^2)
 
+------------------------------------------------------------
+-- Ex 7
+------------------------------------------------------------
 
--- instance Expr MinMax where
---     lit n = MinMax n
---     add (MinMax n) (MinMax m) = MinMax (max n m)
---     mul (MinMax n) (MinMax m) = MinMax (min n m)
+-- Data type of 2x2 matrices of integers (a b // c d)
+data Matrix = Matrix Integer Integer Integer Integer
+
+instance Num Matrix where
+  (*) (Matrix a b c d) (Matrix e f g h) = Matrix (a*e + b*g) (a*f + b*h) (c*e + d*g) (c*f + d*h)
+
+instance Show Matrix where
+  show (Matrix a b c d) = show a ++ show b ++ "\n" ++ show c ++ show d
+
+matrixF :: Matrix
+matrixF = Matrix 1 1 1 0
+
+fib4 :: Integer -> Integer
+fib4 0 = 0
+fib4 n = 
+  let (Matrix a b c d) = matrixF ^ n
+  in b
+
+fib5 :: [Integer]
+fib5 = map fib4 [0..]

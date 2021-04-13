@@ -1,6 +1,9 @@
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving #-}
 module JoinList where
 
 import Sized
+import Scrabble
+import Buffer
 
 data JoinList m a = Empty
                   | Single m a
@@ -75,3 +78,33 @@ takeJ i (Append m l r)
 ss1 x = Single (Size 1) x
 hello = map ss1 "hello"
 w = foldl (+++) Empty hello
+
+---------------------------------------------------------------
+-- Ex 3
+---------------------------------------------------------------
+
+scoreLine :: String -> JoinList Score String
+scoreLine x = Single (scoreString x) x
+
+---------------------------------------------------------------
+-- Ex 4
+---------------------------------------------------------------
+
+instance Buffer (JoinList (Score, Size) String) where
+  toString Empty = ""
+  toString (Single m a) = a
+  toString (Append m l r) = toString l ++ toString r
+
+  fromString "" = Empty
+  fromString s = foldl (+++) Empty $ map fromLine (lines s)
+    where
+      fromLine = \x -> Single (scoreString x, 1) x
+
+  line = indexJ
+
+  replaceLine i s b = takeJ i b +++ fromString s +++ dropJ (i+1) b
+
+  numLines b = getSize . size . snd . tag $ b
+
+  value b = scoreToInt . fst . tag $ b
+

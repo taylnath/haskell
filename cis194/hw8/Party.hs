@@ -81,3 +81,43 @@ maxPair (x,y) = max x y
 -- outputs a fun-maximizing guest list
 maxFun :: Tree Employee -> GuestList
 maxFun t = maxPair $ treeFold (GL [] 0, GL [] 0) nextLevel t
+
+-------------------------------------------------------------
+-- Ex 5
+-------------------------------------------------------------
+-- True if e1 < e2 (comparing names)
+nameCmp :: Employee -> Employee -> Bool
+nameCmp e1 e2 = (empName e1) < (empName e2)
+
+-- get elements lower than e
+getLower :: Employee -> [Employee] -> [Employee]
+getLower e es = filter (\x -> nameCmp x e) es
+
+-- get elements bigger than e
+getUpper :: Employee -> [Employee] -> [Employee]
+getUpper e es = filter (\x -> not (nameCmp x e)) es
+
+sortEmps :: [Employee] -> [Employee]
+sortEmps [] = []
+sortEmps [e] = [e]
+sortEmps (e:es) = sortEmps (getLower e es) ++ [e] ++ sortEmps (getUpper e es)
+
+empNames :: [Employee] -> [String]
+empNames es = map empName $ sortEmps es
+
+getFun :: GuestList -> Fun
+getFun (GL _ f) = f
+
+getList :: GuestList -> [Employee]
+getList (GL gl _) = gl
+
+main :: IO ()
+main = do
+  contents <- readFile "company.txt"
+  let x = read contents :: Tree Employee
+  let y = maxFun x
+  let fun = show $ getFun y
+  let list = (empNames . getList) y
+  putStr "Total fun: "
+  putStrLn fun
+  mapM_ putStrLn list

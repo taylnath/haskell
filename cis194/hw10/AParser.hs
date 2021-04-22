@@ -87,5 +87,22 @@ instance Applicative Parser where
 -- Ex 3
 ------------------------------------------------------------
 
+safeSplit :: [String] -> Maybe (String, String)
+safeSplit [] = Nothing
+safeSplit (x:xs) = Just (x, unwords xs)
+
+type Name = String
+
+parseName :: Parser Name
+parseName = Parser f
+  where f s = safeSplit $ words s
+
+parsePhone :: Parser String
+parsePhone = Parser f
+  where f s = safeSplit $ words s
+
+data Employee = Emp { name :: Name, phone :: String }
+  deriving Show
+
 -- expects to see characters 'a' and 'b' then returns them as a pair.
-abParser :: Parser (Char, Char)
+-- abParser :: Parser (Char, Char)

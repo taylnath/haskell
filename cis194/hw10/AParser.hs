@@ -72,10 +72,20 @@ instance Functor Parser where
 -- Ex 2
 ------------------------------------------------------------
 --  (<*>) :: f (a -> b) -> f a -> f b
--- instance Applicative Parser where
---   pure x = Parser (\y -> Just (y, ""))
---   (<*>) pf p = Parser f
---     where 
---       f s
---         | runParser pf s == Nothing = Nothing
---         | otherwise = fmap (runParser pf s) (runParser p t)
+instance Applicative Parser where
+  pure x = Parser (\y -> Just (x, ""))
+  (<*>) pf p = Parser f
+    where 
+      f s = case runParser pf s of
+        Nothing -> Nothing
+        Just (g, t) -> fmap (first g) (runParser p t)
+
+        -- | runParser pf s == Nothing = Nothing
+        -- | otherwise = fmap (runParser pf s) (runParser p t)
+
+------------------------------------------------------------
+-- Ex 3
+------------------------------------------------------------
+
+-- expects to see characters 'a' and 'b' then returns them as a pair.
+abParser :: Parser (Char, Char)

@@ -105,4 +105,14 @@ data Employee = Emp { name :: Name, phone :: String }
   deriving Show
 
 -- expects to see characters 'a' and 'b' then returns them as a pair.
--- abParser :: Parser (Char, Char)
+abParser :: Parser (Char, Char)
+abParser = (\x y -> (x,y)) <$> (char 'a') <*> (char 'b')
+
+abParser_ :: Parser ()
+abParser_ = (\x y -> ()) <$> (char 'a') <*> (char 'b')
+
+-- spaceParser :: Parser String
+-- spaceParser = (\x )
+
+intPair :: Parser [Integer]
+intPair = (\x y -> [x,y]) <$> posInt <*> posInt

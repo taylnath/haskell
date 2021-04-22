@@ -115,4 +115,7 @@ abParser_ = (\x y -> ()) <$> (char 'a') <*> (char 'b')
 -- spaceParser = (\x )
 
 intPair :: Parser [Integer]
-intPair = (\x y -> [x,y]) <$> posInt <*> posInt
+intPair = (\x y z-> [x,z]) <$> posInt <*> (char ' ') <*> posInt
+
+intSpace :: Parser [Integer]
+intSpace = (\x y -> [x]) <$> posInt <*> (char ' ')

@@ -111,11 +111,41 @@ abParser = (\x y -> (x,y)) <$> (char 'a') <*> (char 'b')
 abParser_ :: Parser ()
 abParser_ = (\x y -> ()) <$> (char 'a') <*> (char 'b')
 
--- spaceParser :: Parser String
--- spaceParser = (\x )
-
+-- expects a pair of integers separated by a space
 intPair :: Parser [Integer]
 intPair = (\x y z-> [x,z]) <$> posInt <*> (char ' ') <*> posInt
 
 intSpace :: Parser [Integer]
 intSpace = (\x y -> [x]) <$> posInt <*> (char ' ')
+
+--------------------------------------------------------------
+-- Ex 4
+--------------------------------------------------------------
+
+instance Alternative Parser where
+  empty = Parser (\s -> Nothing)
+  (<|>) (Parser f) (Parser g) = Parser h
+    where 
+      h s = case f s of
+        Nothing -> g s
+        something -> something
+
+  -- (<*>) pf p = Parser f
+  --   where 
+  --     f s = case runParser pf s of
+  --       Nothing -> Nothing
+  --       Just (g, t) -> fmap (first g) (runParser p t)
+
+--------------------------------------------------------------
+-- Ex 5
+--------------------------------------------------------------
+
+-- wants an integer or upper case letter
+intOrUppercase :: Parser ()
+intOrUppercase = (\x -> ()) <$> posInt <|> (\x -> ()) <$> (satisfy isUpper)
+
+posInt' :: Parser ()
+posInt' = (\x -> ()) <$> posInt
+
+aOrb :: Parser Char
+aOrb = (char 'a') <|> (char 'b')

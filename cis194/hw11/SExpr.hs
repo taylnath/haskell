@@ -47,46 +47,33 @@ data SExpr = A Atom
            | Comb [SExpr]
   deriving Show
 
--- parseParenNoConsume :: Parser Char
--- parseParenNoConsume = fmap (\(x,y) -> x:y) (char ')') 
+-- -- parse an Atom integer
+-- parseN :: Parser Atom
+-- parseN = fmap (\x -> N x) posInt
 
--- parse an Atom integer
-parseN :: Parser Atom
--- parseN = (\x y -> x) <$> (fmap (\x -> N x) posInt) <*> (char ' ')
-parseN = fmap (\x -> N x) posInt
-
--- parse an Atom identifier
-parseI :: Parser Atom
-parseI = fmap (\x -> I x) ident
+-- -- parse an Atom identifier
+-- parseI :: Parser Atom
+-- parseI = fmap (\x -> I x) ident
 
 -- parse an Atom
 parseAtom :: Parser Atom
-parseAtom = parseN <|> parseI
+-- parseAtom = parseN <|> parseI
+parseAtom = (N <$> posInt) <|> (I <$> ident)
 
--- parse an Atom as an S Expression
-parseA :: Parser SExpr
-parseA = fmap (\x -> A x) parseAtom
+-- -- parse an Atom as an S Expression
+-- parseA :: Parser SExpr
+-- parseA = fmap (\x -> A x) parseAtom
 
--- parseSpacedAs :: Parser [ SExpr ]
--- parseSpacedAs = oneOrMore (spaces *> parseA)
-
-parseSomeA :: Parser SExpr
-parseSomeA = (\x y z -> y) <$> (char '(') <*> parseA <*> (char ')')
+-- parseSomeA :: Parser SExpr
+-- parseSomeA = (\x y z -> y) <$> (char '(') <*> parseA <*> (char ')')
 
 -- parse a parser but in parenthesis, throwing away surrounding spaces
 parseInParens :: Parser a -> Parser a
--- parseInParens p = (\x y z -> y) <$> (char '(') <*> (spaces *> p <* spaces) <*> (char ')')
 parseInParens p = (\x y z -> y) <$> (char '(') <*> (spaces *> p ) <*> (char ')')
 
-parseComb :: Parser [SExpr] -> Parser SExpr
-parseComb = fmap (\x -> Comb x) 
+-- parseComb :: Parser [SExpr] -> Parser SExpr
+-- parseComb = fmap (\x -> Comb x) 
 
 parseSExpr :: Parser SExpr
--- parseSExpr = (spaces *> parseA <* spaces) <|> (parseComb (oneOrMore (parseInParens parseSExpr)))
--- parseSExpr = (spaces *> parseA) <|> (spaces *> (parseComb (parseInParens (oneOrMore parseSExpr))))
-parseSExpr = (spaces *> parseA) <|> (parseComb (parseInParens (oneOrMore (spaces *> parseSExpr <* spaces))))
-
--- parseSExpr :: Parser SExpr
--- parseSExpr = (spaces *> parseA) <|> (oneOrMore expr)
---   where
---     expr = (\x y z -> Comb y) <$> (char '(') <*> parseSExpr <*> (char ')')
+-- parseSExpr = (spaces *> parseA) <|> (parseComb (parseInParens (oneOrMore (spaces *> parseSExpr <* spaces))))
+parseSExpr = (spaces *> (A <$> parseAtom)) <|> (Comb <$> (parseInParens (oneOrMore (spaces *> parseSExpr <* spaces))))

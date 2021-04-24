@@ -48,7 +48,7 @@ data SExpr = A Atom
   deriving Show
 
 parseN :: Parser Atom
-parseN = fmap (\x -> N x) posInt
+parseN = (\x y -> x) <$> (fmap (\x -> N x) posInt) <*> (char ' ')
 
 parseI :: Parser Atom
 parseI = fmap (\x -> I x) ident
@@ -58,6 +58,12 @@ parseAtom = parseN <|> parseI
 
 parseA :: Parser SExpr
 parseA = fmap (\x -> A x) parseAtom
+
+parseSpacedAs :: Parser [ SExpr ]
+parseSpacedAs = oneOrMore (spaces *> parseA)
+
+parseSomeA :: Parser SExpr
+parseSomeA = (\x y z -> y) <$> (char '(') <*> parseA <*> (char ')')
 
 parseSExpr :: Parser SExpr
 parseSExpr = (spaces *> parseA) <|> empty
